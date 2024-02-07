@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    build:
+      context: ./dbdata
+      dockerfile: pgdb.Dockerfile
+    restart: always
+    container_name: postgres_database
+    privileged: true
+    env_file:
+      - local.env
+    user: root
+    ports:
+      - '5432:5432'
+    volumes:
+      - './dbdata/postgresdata:/var/lib/postgresql/data'
+  middleware:
+    build:
+      context: ./fastapi
+      dockerfile: python.Dockerfile
+      shm_size: 12gb
+    shm_size: 12gb
+    restart: always
+    container_name: fastapi
+    privileged: true
+    env_file:
+      - local.env
+    user: root
+    ports:
+      - '8000:8000'
+  neo4j:
+    image: neo4j:latest
+    container_name: my_neo4j_container
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/test1234
+    volumes:
+      - ./dbdata/neo4jdata:/data
